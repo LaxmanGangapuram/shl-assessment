@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHL Assessment Recommendation System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .search-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .input-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .results-header {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .results-header h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .results-count {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .assessment-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .assessment-table th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .assessment-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .assessment-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .assessment-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .assessment-url {
+            color: #667eea;
+            text-decoration: none;
+            word-break: break-all;
+        }
+
+        .assessment-url:hover {
+            text-decoration: underline;
+        }
+
+        .score-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .score-high {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .score-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .score-low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 5px;
+        }
+
+        .type-K { background: #e3f2fd; color: #1565c0; }
+        .type-P { background: #f3e5f5; color: #6a1b9a; }
+        .type-A { background: #e8f5e9; color: #2e7d32; }
+        .type-S { background: #fff3e0; color: #e65100; }
+        .type-O { background: #f5f5f5; color: #616161; }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        .sample-queries {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .sample-queries h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .sample-query {
+            display: inline-block;
+            padding: 8px 15px;
+            margin: 5px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .sample-query:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 SHL Assessment Recommendation System</h1>
+            <p>Find the perfect assessments for your hiring needs</p>
+        </div>
+
+        <div class="search-section">
+            <div class="input-group">
+                <label for="queryInput">Enter Job Description or Query:</label>
+                <textarea 
+                    id="queryInput" 
+                    placeholder="Example: I am hiring for Java developers who can also collaborate effectively with my business teams..."
+                ></textarea>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="getRecommendations()">
+                    Get Recommendations
+                </button>
+                <button class="btn-secondary" onclick="clearInput()">
+                    Clear
+                </button>
+            </div>
+
+            <div class="sample-queries">
+                <h4>Sample Queries (Click to use):</h4>
+                <div class="sample-query" onclick="useSampleQuery(this)">
+                    I am hiring for Java developers who can also collaborate effectively with my business teams.
+                </div>
+                <div class="sample-query" onclick="useSampleQuery(this)">
+                    Looking to hire mid-level professionals who are proficient in Python, SQL and JavaScript.
+                </div>
+                <div class="sample-query" onclick="useSampleQuery(this)">
+                    I am hiring for an analyst and want to screen using Cognitive and personality tests.
+                </div>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Finding the best assessments for you...</p>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="results-header">
+                <h2>Recommended Assessments</h2>
+                <p class="results-count" id="resultsCount"></p>
+            </div>
+
+            <table class="assessment-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Assessment Name</th>
+                        <th>Type</th>
+                        <th>Relevance</th>
+                        <th>URL</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // API endpoint - change this to your deployed API URL
+        const API_URL = 'http://localhost:5000';
+
+        function useSampleQuery(element) {
+            document.getElementById('queryInput').value = element.textContent.trim();
+        }
+
+        function clearInput() {
+            document.getElementById('queryInput').value = '';
+            document.getElementById('resultsSection').classList.remove('active');
+            document.getElementById('errorMessage').classList.remove('active');
+        }
+
+        async function getRecommendations() {
+            const query = document.getElementById('queryInput').value.trim();
+            
+            if (!query) {
+                showError('Please enter a query or job description');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('resultsSection').classList.remove('active');
+            document.getElementById('errorMessage').classList.remove('active');
+
+            try {
+                const response = await fetch(`${API_URL}/recommend`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                showError(`Failed to get recommendations: ${error.message}`);
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+
+        function displayResults(data) {
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsCount = document.getElementById('resultsCount');
+            const tableBody = document.getElementById('resultsTableBody');
+
+            // Clear previous results
+            tableBody.innerHTML = '';
+
+            // Update count
+            resultsCount.textContent = `Found ${data.count} relevant assessments`;
+
+            // Add rows
+            data.recommendations.forEach((rec, index) => {
+                const row = document.createElement('tr');
+                
+                const scoreClass = rec.relevance_score >= 0.7 ? 'score-high' : 
+                                   rec.relevance_score >= 0.5 ? 'score-medium' : 'score-low';
+                
+                const typeClass = `type-${rec.test_type}`;
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td class="assessment-name">${rec.assessment_name}</td>
+                    <td>
+                        <span class="type-badge ${typeClass}">${rec.test_type}</span>
+                        ${rec.category}
+                    </td>
+                    <td>
+                        <span class="score-badge ${scoreClass}">
+                            ${(rec.relevance_score * 100).toFixed(1)}%
+                        </span>
+                    </td>
+                    <td>
+                        <a href="${rec.url}" target="_blank" class="assessment-url">
+                            View Assessment →
+                        </a>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+
+            // Show results
+            resultsSection.classList.add('active');
+        }
+
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.classList.add('active');
+        }
+
+        // Allow Enter key to submit (with Shift+Enter for new line)
+        document.getElementById('queryInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                getRecommendations();
+            }
+        });
+    </script>
+</body>
+</html>
