@@ -7,7 +7,6 @@ import json
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-import pandas as pd
 from typing import List, Dict, Tuple
 import os
 import pickle
